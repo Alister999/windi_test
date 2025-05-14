@@ -16,6 +16,7 @@ class UserLogin(BaseUser):
     password: str
 
 class UserResponse(BaseUser):
+    id: int
     name: str
     email: str
     password_hash: str
