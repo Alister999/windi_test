@@ -93,7 +93,7 @@ async def get_chat_now(chat_id: int, db: AsyncSession) -> ChatResponse:
     if not get_chat:
         raise HTTPException(
             status_code=404,
-            detail=f'chat with id {chat_id} not found'
+            detail=f'Chat with id {chat_id} not found'
         )
 
     re_formatted_chat = ChatResponse.model_validate(get_chat)

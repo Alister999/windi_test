@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.schemas.chats import ChatCreate, ChatResponse
+from app.schemas.chats import ChatResponse, ChatCreate
 from app.services.chat_service import create_chat_now, delete_chat_now, change_chat_now, get_chats_now, get_chat_now
 
 router = APIRouter()

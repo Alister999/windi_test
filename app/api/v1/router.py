@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from .endpoints import auth, chats, groups, messages  # upload, files, auth
+from .endpoints import auth, chats, groups, messages
 
 router = APIRouter(prefix="/v1")
 
