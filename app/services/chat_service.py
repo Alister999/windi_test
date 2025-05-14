@@ -3,18 +3,26 @@ from typing import List
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import ChatRepository
+from app.core.database import ChatRepository, UserRepository
 from app.models.chats import Chat
+from app.models.user import User
 from app.schemas.chats import ChatCreate, ChatResponse
 
 
 async def create_chat_now(data: ChatCreate, db: AsyncSession) -> ChatResponse:
     repo = ChatRepository(session=db)
+    repo_users = UserRepository(session=db)
     check_chat = await repo.get_one_or_none(Chat.name_chat == data.name_chat)
     if check_chat:
         raise HTTPException(
             status_code=403,
-            detail=f'Chat with name {data.name_chat} already exist'
+            detail=f"Chat with name '{data.name_chat}' already exist"
+        )
+    check_user = await repo_users.get_one_or_none(User.id == data.creator_id)
+    if not check_user:
+        raise HTTPException(
+            status_code=404,
+            detail=f"User-creator with id '{data.creator_id}' not found"
         )
 
     updated_data = data.dict(exclude_unset=True)
@@ -39,28 +47,35 @@ async def delete_chat_now(chat_id: int, db: AsyncSession) -> dict:
     if not check_chat:
         raise HTTPException(
             status_code=404,
-            detail=f'Chat with id {chat_id} is absent'
+            detail=f"Chat with id '{chat_id}' is absent"
         )
 
     await repo.delete(chat_id)
     await db.commit()
 
-    return {"message": f"Chat with id {chat_id} was deleted successful"}
+    return {"message": f"Chat with id '{chat_id}' was deleted successful"}
 
 
 async def change_chat_now(chat_id: int, data: ChatCreate, db: AsyncSession) -> ChatResponse:
     repo = ChatRepository(session=db)
+    repo_users = UserRepository(session=db)
     check_chat = await repo.get_one_or_none(Chat.id == chat_id)
     if not check_chat:
         raise HTTPException(
             status_code=404,
-            detail=f'Chat with id {chat_id} is absent'
+            detail=f"Chat with id '{chat_id}' is absent"
         )
     check_chat_name = await repo.get_one_or_none(Chat.name_chat == data.name_chat)
     if check_chat_name:
         raise HTTPException(
             status_code=403,
-            detail=f'Chat with name {data.name_chat} already exist'
+            detail=f"Chat with name '{data.name_chat}' already exist"
+        )
+    check_user = await repo_users.get_one_or_none(User.id == data.creator_id)
+    if not check_user:
+        raise HTTPException(
+            status_code=404,
+            detail=f"User-creator with id '{data.creator_id}' not found"
         )
 
     updated_data = data.dict(exclude_unset=True)
@@ -93,7 +108,7 @@ async def get_chat_now(chat_id: int, db: AsyncSession) -> ChatResponse:
     if not get_chat:
         raise HTTPException(
             status_code=404,
-            detail=f'Chat with id {chat_id} not found'
+            detail=f"Chat with id '{chat_id}' not found"
         )
 
     re_formatted_chat = ChatResponse.model_validate(get_chat)

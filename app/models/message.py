@@ -17,8 +17,8 @@ class Message(Base):
     __tablename__ = "messages"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, unique=True, index=True)
-    # chat_id: Mapped["Chat"] = mapped_column(ForeignKey("chats.id"), nullable=False)
-    # sender_id: Mapped["User"] = mapped_column(ForeignKey("users.id"), nullable=False)
+    chat_id: Mapped[int] = mapped_column(ForeignKey("chats.id"), nullable=False)
+    sender_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     text: Mapped[str]
     timestamp: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     is_read: Mapped[ReadType] = mapped_column(Enum(ReadType), default=ReadType.UNREAD, nullable=False)

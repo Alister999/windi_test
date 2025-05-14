@@ -5,14 +5,6 @@ from app.models.general import Base
 from app.models.user import User
 
 
-# chat_user_association = Table(
-#     "chat_user_association",
-#     Base.metadata,
-#     Column("chat_id", ForeignKey("chats.id"), primary_key=True),
-#     Column("user_id", ForeignKey("users.id"), primary_key=True),
-# )
-
-
 class Group(Base):
     __tablename__ = "groups"
 
