@@ -56,6 +56,12 @@ async def change_chat_now(chat_id: int, data: ChatCreate, db: AsyncSession) -> C
             status_code=404,
             detail=f'Chat with id {chat_id} is absent'
         )
+    check_chat_name = await repo.get_one_or_none(Chat.name_chat == data.name_chat)
+    if check_chat_name:
+        raise HTTPException(
+            status_code=403,
+            detail=f'Chat with name {data.name_chat} already exist'
+        )
 
     updated_data = data.dict(exclude_unset=True)
 
