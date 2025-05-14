@@ -1,35 +1,41 @@
+from typing import List
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# from app.core.database import get_db
-# from app.schemas.user import UserResponse, UserCreate, UserLogin, RefreshToken
-# from app.services.auth_service import reg_user, login_user, refresh_my_token
+from app.core.database import get_db
+from app.schemas.messages import MessageResponse, MessageCreate
+from app.services.message_service import create_message_now, delete_message_now, change_message_now, get_messages_now, \
+    get_message_now
 
 router = APIRouter()
 
 
-@router.post('/message')#, response_model=UserResponse)
-async def create_message(): #user: UserCreate, db: AsyncSession = Depends(get_db)) -> UserResponse:
-    # result = await reg_user(user, db)
-    # return result
-    pass
+@router.post('/message', response_model=MessageResponse)
+async def create_message(data: MessageCreate, db: AsyncSession = Depends(get_db)) -> MessageResponse:
+    result = await create_message_now(data, db)
+    return result
 
 
-@router.delete('/message/{int: id}')
-async def delete_message(id: int):
-    pass
+@router.delete('/message/{message_id}')
+async def delete_message(message_id: int, db: AsyncSession = Depends(get_db)) -> dict:
+    result = await delete_message_now(message_id, db)
+    return result
 
 
-@router.put('/message/{int: id}')
-async def change_message(id: int):
-    pass
+@router.put('/message/{message_id}', response_model=MessageResponse)
+async def change_message(message_id: int, data: MessageCreate, db: AsyncSession = Depends(get_db)) -> MessageResponse:
+    result = await change_message_now(message_id, data, db)
+    return result
 
 
-@router.get('/message')
-async def get_messages():
-    pass
+@router.get('/message', response_model=List[MessageResponse])
+async def get_messages(db: AsyncSession = Depends(get_db)) -> List[MessageResponse]:
+    result = await get_messages_now(db)
+    return result
 
 
-@router.get('/message/{int: id}')
-async def get_message(id: int):
-    pass
+@router.get('/message/{message_id}', response_model=MessageResponse)
+async def get_message(message_id: int, db: AsyncSession = Depends(get_db)) -> MessageResponse:
+    result = await get_message_now(message_id, db)
+    return result

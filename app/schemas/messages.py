@@ -12,12 +12,10 @@ class MessageGroup(BaseModel):
 
 class MessageCreate(MessageGroup):
     text: str
-    timestamp: datetime
-    is_read: ReadType = ReadType.UNREAD
 
 
 class MessageResponse(MessageGroup):
     id: int
     text: str
     timestamp: datetime
-    is_read: ReadType
+    is_read: ReadType = ReadType.UNREAD
