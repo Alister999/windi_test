@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.models.message import ReadType
 
@@ -11,7 +11,7 @@ class MessageGroup(BaseModel):
 
 
 class MessageCreate(MessageGroup):
-    text: str
+    text: str = Field(max_length=200)
     chat_id: int
     sender_id: int
 

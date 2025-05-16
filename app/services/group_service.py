@@ -2,11 +2,13 @@ from typing import List
 
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.database import GroupRepository, UserRepository
 from app.models.group import Group
 from app.models.user import User
 from app.schemas.groups import GroupCreate, GroupResponse
+from app.schemas.users import UserResponse
 
 
 async def create_group_now(data: GroupCreate, db: AsyncSession) -> GroupResponse:
@@ -25,18 +27,32 @@ async def create_group_now(data: GroupCreate, db: AsyncSession) -> GroupResponse
             detail=f"User-creator with id '{data.creator_id}' not found"
         )
 
-    updated_data = data.dict(exclude_unset=True)
-    new_group = Group()
+    users = []
+    for user_id in data.user_ids:
+        check_user = await repo_users.get_one_or_none(User.id == user_id)
+        if not check_user:
+            raise HTTPException(
+                status_code=404,
+                detail=f"User-participant with id '{user_id}' not found"  # Исправлено: user_id вместо creator_id
+            )
+        users.append(check_user)
 
-    for key, value in updated_data.items():
-        if key != "id":
-            setattr(new_group, key, value)
+    new_group = Group(
+        name_group=data.name_group,
+        creator_id=data.creator_id,
+        users=users
+    )
 
     await repo.add(new_group)
     await db.commit()
     await db.refresh(new_group)
 
-    re_formatted_group = GroupResponse.model_validate(new_group)
+    re_formatted_group = GroupResponse(
+        id=new_group.id,
+        name_group=new_group.name_group,
+        creator_id=new_group.creator_id,
+        user_ids=[UserResponse.model_validate(user) for user in new_group.users]
+    )
 
     return re_formatted_group
 
@@ -78,26 +94,47 @@ async def change_group_now(group_id: int, data: GroupCreate, db: AsyncSession) -
             detail=f"Group with name '{data.name_group}' already exist"
         )
 
-    updated_data = data.dict(exclude_unset=True)
+    users = []
+    for user_id in data.user_ids:
+        check_user = await repo_users.get_one_or_none(User.id == user_id)
+        if not check_user:
+            raise HTTPException(
+                status_code=404,
+                detail=f"User-participant with id '{user_id}' not found"
+            )
+        users.append(check_user)
 
-    for key, value in updated_data.items():
-        if key != "id":
-            setattr(check_group, key, value)
+    check_group.name_group=data.name_group
+    check_group.creator_id=data.creator_id
+    check_group.users=users
 
     await repo.update(check_group)
     await db.commit()
     await db.refresh(check_group)
 
-    re_formatted_group = GroupResponse.model_validate(check_group)
+    re_formatted_group = GroupResponse(
+        id=check_group.id,
+        name_group=check_group.name_group,
+        creator_id=check_group.creator_id,
+        user_ids=[UserResponse.model_validate(user) for user in check_group.users]
+    )
 
     return re_formatted_group
 
 
 async def get_groups_now(db: AsyncSession) -> List[GroupResponse]:
     repo = GroupRepository(session=db)
-    get_groups = await repo.list()
+    get_groups = await repo.list(load=(selectinload(Group.users),))
 
-    re_formatted_groups = [GroupResponse.model_validate(group) for group in get_groups]
+    re_formatted_groups = [
+        GroupResponse(
+            id=group.id,
+            name_group=group.name_group,
+            creator_id=group.creator_id,
+            user_ids=[UserResponse.model_validate(user) for user in group.users]
+        )
+        for group in get_groups
+    ]
 
     return re_formatted_groups
 

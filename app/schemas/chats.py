@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.models.chats import ChatType
 
@@ -9,7 +9,7 @@ class BaseChat(BaseModel):
 
 
 class ChatCreate(BaseChat):
-    name_chat: str
+    name_chat: str = Field(max_length=50)
     type: ChatType = ChatType.PERSONAL
     creator_id: int
 
