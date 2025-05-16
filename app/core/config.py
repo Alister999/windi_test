@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     DB_PASSWORD: str
     DB_HOST: str
     DB_NAME: str
-    CORS_ORIGINS: List[str] = ["http://localhost:3000"]
+    # CORS_ORIGINS: List[str] = ["http://localhost:3000"]
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     REFRESH_TOKEN_EXPIRE_DAYS: int

@@ -19,13 +19,13 @@ async def reg_user(user: UserCreate, db: AsyncSession) -> UserResponse:
     if await repo.get_one_or_none(User.name == user.name):
         raise HTTPException(
             status_code=403,
-            detail=f'User with username {user.name} already exist'
+            detail=f"User with username '{user.name}' already exist"
         )
 
     if await repo.get_one_or_none(User.email == user.email):
         raise HTTPException(
             status_code=403,
-            detail=f'User with email {user.email} already exist'
+            detail=f"User with email '{user.email}' already exist"
         )
 
     new_user = User(
@@ -111,7 +111,7 @@ async def get_current_user(user_id: int, db: AsyncSession) -> UserResponse:
     if not getting_user:
         raise HTTPException(
             status_code=404,
-            detail=f'User with id {user_id} is absent'
+            detail=f"User with id '{user_id}' is absent"
         )
 
     re_formatted_user = UserResponse.model_validate(getting_user)
@@ -125,7 +125,7 @@ async def delete_current_user(user_id: int, db: AsyncSession) -> bool:
     if not getting_user:
         raise HTTPException(
             status_code=404,
-            detail=f'User with id {user_id} is absent'
+            detail=f"User with id '{user_id}' is absent"
         )
 
     await repo.delete(user_id)
@@ -140,7 +140,7 @@ async def change_current_user(data: UserCreate, user_id: int, db: AsyncSession) 
     if not getting_user:
         raise HTTPException(
             status_code=404,
-            detail=f'User with id {user_id} is absent'
+            detail=f"User with id '{user_id}' is absent"
         )
 
     updated_data = data.dict(exclude_unset=True)
@@ -149,7 +149,7 @@ async def change_current_user(data: UserCreate, user_id: int, db: AsyncSession) 
         if getting_name_user:
             raise HTTPException(
                 status_code=400,
-                detail=f'User with name {updated_data['name']} already exist'
+                detail=f"User with name '{updated_data['name']}' already exist"
             )
         else:
             getting_user.name = updated_data['name']
@@ -158,7 +158,7 @@ async def change_current_user(data: UserCreate, user_id: int, db: AsyncSession) 
         if getting_name_email:
             raise HTTPException(
                 status_code=400,
-                detail=f'User with email {updated_data['email']} already exist'
+                detail=f"User with email '{updated_data['email']}' already exist"
             )
         else:
             getting_user.email = updated_data['email']

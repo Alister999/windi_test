@@ -1,35 +1,40 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List
 
-# from app.core.database import get_db
-# from app.schemas.user import UserResponse, UserCreate, UserLogin, RefreshToken
-# from app.services.auth_service import reg_user, login_user, refresh_my_token
+from fastapi import APIRouter
+from app.core.dependencies import SessionDep, AuthDep
+from app.schemas.groups import GroupResponse, GroupCreate
+from app.services.group_service import create_group_now, delete_group_now, change_group_now, get_groups_now, \
+    get_group_now
 
 router = APIRouter()
 
 
-@router.post('/group')#, response_model=UserResponse)
-async def create_group(): #user: UserCreate, db: AsyncSession = Depends(get_db)) -> UserResponse:
-    # result = await reg_user(user, db)
-    # return result
-    pass
+@router.post('/group', response_model=GroupResponse)
+async def create_group(data: GroupCreate, db: SessionDep, current_user: AuthDep) -> GroupResponse:
+    result = await create_group_now(data, db)
+    return result
 
 
-@router.delete('/group/{int: id}')
-async def delete_group(id: int):
-    pass
+@router.delete('/group/{group_id}')
+async def delete_group(group_id: int, db: SessionDep, current_user: AuthDep) -> dict:
+    result = await delete_group_now(group_id, db)
+    return result
 
 
-@router.put('/group/{int: id}')
-async def change_group(id: int):
-    pass
+
+@router.put('/group/{group_id}', response_model=GroupResponse)
+async def change_group(group_id: int, data: GroupCreate, db: SessionDep, current_user: AuthDep) -> GroupResponse:
+    result = await change_group_now(group_id, data, db)
+    return result
 
 
-@router.get('/group')
-async def get_groups():
-    pass
+@router.get('/group', response_model=List[GroupResponse])
+async def get_groups(db: SessionDep, current_user: AuthDep) -> List[GroupResponse]:
+    result = await get_groups_now(db)
+    return result
 
 
-@router.get('/group/{int: id}')
-async def get_group(id: int):
-    pass
+@router.get('/group/{group_id}', response_model=GroupResponse)
+async def get_group(group_id: int, db: SessionDep, current_user: AuthDep) -> GroupResponse:
+    result = await get_group_now(group_id, db)
+    return result

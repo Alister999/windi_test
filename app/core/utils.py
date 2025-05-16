@@ -34,14 +34,14 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
     )
     try:
         payload = jwt.decode(token, os.getenv("SECRET_KEY"), algorithms=[settings.ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
+        name: str = payload.get("sub")
+        if name is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
 
     repo = UserRepository(session=db)
-    user = await repo.get_one_or_none(User.username == username)
+    user = await repo.get_one_or_none(User.name == name)
 
     if user is None:
         raise credentials_exception
