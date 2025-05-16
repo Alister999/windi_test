@@ -148,6 +148,12 @@ async def get_group_now(group_id: int, db: AsyncSession) -> GroupResponse:
             detail=f"Group with id '{group_id}' not found"
         )
 
-    re_formatted_group = GroupResponse.model_validate(get_group)
+    re_formatted_group = GroupResponse(
+        id=get_group.id,
+        name_group=get_group.name_group,
+        creator_id=get_group.creator_id,
+        user_ids=[UserResponse.model_validate(user) for user in get_group.users]
+    )
+
 
     return re_formatted_group
