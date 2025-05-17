@@ -10,14 +10,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from src.core.config import settings
-from src.core.database import init_db, get_db #, UserRepository
+from src.core.database import init_db, get_db, UserRepository  # , UserRepository
 # from src.core.dependencies import SessionDep
 from src.models.user import User
 
 load_dotenv()
-
-class UserRepository(SQLAlchemyAsyncRepository[User]):
-    model_type = User
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -56,13 +53,16 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
 async def get_current_user_ws(token: str = Query(...), db: AsyncSession = Depends(get_db)) -> User:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=settings.ALGORITHM)
-        user_id: str = payload.get("sub")
-        if user_id is None:
+        user_name: str = payload.get("sub")
+        if user_name is None:
             raise HTTPException(status_code=401, detail="Invalid token")
-        user_repo = SQLAlchemyAsyncRepository[User](session=db, model_type=User)
-        user = await user_repo.get_one_or_none(User.id == int(user_id))
+        user_repo = UserRepository(session=db) #SQLAlchemyAsyncRepository[User](session=db, model_type=User)
+        user = await user_repo.get_one_or_none(User.name == user_name)
         if user is None:
             raise HTTPException(status_code=401, detail="User not found")
+        await db.refresh(user, attribute_names=["name", "id"])
         return user
+    except ValueError as e:
+        raise HTTPException(status_code=401, detail="Invalid token")
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")

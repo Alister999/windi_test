@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter
 
 from src.core.dependencies import SessionDep, AuthDep
-from src.schemas.messages import MessageResponse, MessageCreate
+from src.schemas.messages import MessageResponse, MessageCreate, MessageHistory
 from src.services.message_service import create_message_now, delete_message_now, change_message_now, get_messages_now, \
     get_message_now, get_messages_history
 
@@ -40,7 +40,7 @@ async def get_message(message_id: int, db: SessionDep, current_user: AuthDep) ->
     return result
 
 
-@router.get("/history/{chat_id}", response_model=List[MessageResponse])
+@router.get("/history/{chat_id}", response_model=List[MessageHistory])
 async def get_chat_history(
     db: SessionDep,
     chat_id: int,

@@ -8,7 +8,7 @@ from src.core.database import MessageRepository, UserRepository, ChatRepository
 from src.models.chats import Chat
 from src.models.message import Message
 from src.models.user import User
-from src.schemas.messages import MessageCreate, MessageResponse
+from src.schemas.messages import MessageCreate, MessageResponse, MessageHistory
 
 
 async def create_message_now(data: MessageCreate, db: AsyncSession) -> MessageResponse:
@@ -50,7 +50,7 @@ async def delete_message_now(message_id: int, db: AsyncSession) -> dict:
     if not check_message:
         raise HTTPException(
             status_code=404,
-            detail=f"Message with id '{check_message}' is absent"
+            detail=f"Message with id '{message_id}' is absent"
         )
 
     await repo.delete(message_id)
@@ -125,9 +125,8 @@ async def get_messages_history(
         chat_id: int,
         limit: int = 50,
         offset: int = 0,
-) -> List[MessageResponse]:
+) -> List[MessageHistory]:
 
-    # repo = MessageRepository(session=db)
     query = select(Message).where(Message.chat_id == chat_id).order_by(Message.timestamp.asc()).limit(limit).offset(
         offset)
     result = await db.execute(query)
@@ -137,4 +136,7 @@ async def get_messages_history(
             status_code=404,
             detail="No messages found"
         )
-    return [MessageResponse.model_validate(message) for message in messages]
+
+    formatted_messages = [MessageHistory.model_validate(message) for message in messages]
+
+    return formatted_messages #[MessageResponse.model_validate(message) for message in messages]

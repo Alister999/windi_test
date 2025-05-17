@@ -13,7 +13,8 @@ app = FastAPI(
     description="API messenger",
     version="1.0.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
+    debug=True
 )
 
 app.include_router(v1_router, prefix="/api")
