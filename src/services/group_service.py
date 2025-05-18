@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 from fastapi import HTTPException
@@ -10,18 +11,23 @@ from src.models.user import User
 from src.schemas.groups import GroupCreate, GroupResponse
 from src.schemas.users import UserResponse
 
+logger = logging.getLogger("GroupService")
+
 
 async def create_group_now(data: GroupCreate, db: AsyncSession) -> GroupResponse:
+    logger.info("Incoming to create group func")
     repo = GroupRepository(session=db)
     repo_users = UserRepository(session=db)
     check_group = await repo.get_one_or_none(Group.name_group == data.name_group)
     if check_group:
+        logger.warning(f"Group with name '{data.name_group}' already exist")
         raise HTTPException(
             status_code=403,
             detail=f"Group with name '{data.name_group}' already exist"
         )
     check_user = await repo_users.get_one_or_none(User.id == data.creator_id)
     if not check_user:
+        logger.warning(f"User-creator with id '{data.creator_id}' not found")
         raise HTTPException(
             status_code=404,
             detail=f"User-creator with id '{data.creator_id}' not found"
@@ -31,9 +37,10 @@ async def create_group_now(data: GroupCreate, db: AsyncSession) -> GroupResponse
     for user_id in data.user_ids:
         check_user = await repo_users.get_one_or_none(User.id == user_id)
         if not check_user:
+            logger.warning(f"User-participant with id '{user_id}' not found")
             raise HTTPException(
                 status_code=404,
-                detail=f"User-participant with id '{user_id}' not found"  # Исправлено: user_id вместо creator_id
+                detail=f"User-participant with id '{user_id}' not found"
             )
         users.append(check_user)
 
@@ -43,6 +50,7 @@ async def create_group_now(data: GroupCreate, db: AsyncSession) -> GroupResponse
         users=users
     )
 
+    logger.info("Add group to repo")
     await repo.add(new_group)
     await db.commit()
     await db.refresh(new_group)
@@ -58,9 +66,11 @@ async def create_group_now(data: GroupCreate, db: AsyncSession) -> GroupResponse
 
 
 async def delete_group_now(group_id: int, db: AsyncSession) -> dict:
+    logger.info("Incoming to delete group func")
     repo = GroupRepository(session=db)
     check_group = await repo.get_one_or_none(Group.id == group_id)
     if not check_group:
+        logger.warning(f"Group with id '{group_id}' is absent")
         raise HTTPException(
             status_code=404,
             detail=f"Group with id '{group_id}' is absent"
@@ -73,9 +83,11 @@ async def delete_group_now(group_id: int, db: AsyncSession) -> dict:
 
 
 async def change_group_now(group_id: int, data: GroupCreate, db: AsyncSession) -> GroupResponse:
+    logger.info("Incoming to change group func")
     repo = GroupRepository(session=db)
     check_group = await repo.get_one_or_none(Group.id == group_id)
     if not check_group:
+        logger.warning(f"Group with id '{group_id}' is absent")
         raise HTTPException(
             status_code=404,
             detail=f"Group with id '{group_id}' is absent"
@@ -83,12 +95,14 @@ async def change_group_now(group_id: int, data: GroupCreate, db: AsyncSession) -
     repo_users = UserRepository(session=db)
     check_user = await repo_users.get_one_or_none(User.id == data.creator_id)
     if not check_user:
+        logger.warning(f"User-creator with id '{data.creator_id}' not found")
         raise HTTPException(
             status_code=404,
             detail=f"User-creator with id '{data.creator_id}' not found"
         )
     check_group_name = await repo.get_one_or_none(Group.name_group == data.name_group)
     if check_group_name:
+        logger.warning(f"Group with name '{data.name_group}' already exist")
         raise HTTPException(
             status_code=403,
             detail=f"Group with name '{data.name_group}' already exist"
@@ -98,6 +112,7 @@ async def change_group_now(group_id: int, data: GroupCreate, db: AsyncSession) -
     for user_id in data.user_ids:
         check_user = await repo_users.get_one_or_none(User.id == user_id)
         if not check_user:
+            logger.warning(f"User-participant with id '{user_id}' not found")
             raise HTTPException(
                 status_code=404,
                 detail=f"User-participant with id '{user_id}' not found"
@@ -108,6 +123,7 @@ async def change_group_now(group_id: int, data: GroupCreate, db: AsyncSession) -
     check_group.creator_id=data.creator_id
     check_group.users=users
 
+    logger.info("Update group to repo")
     await repo.update(check_group)
     await db.commit()
     await db.refresh(check_group)
@@ -123,6 +139,7 @@ async def change_group_now(group_id: int, data: GroupCreate, db: AsyncSession) -
 
 
 async def get_groups_now(db: AsyncSession) -> List[GroupResponse]:
+    logger.info("Incoming to get groups func")
     repo = GroupRepository(session=db)
     get_groups = await repo.list(load=(selectinload(Group.users),))
 
@@ -140,9 +157,11 @@ async def get_groups_now(db: AsyncSession) -> List[GroupResponse]:
 
 
 async def get_group_now(group_id: int, db: AsyncSession) -> GroupResponse:
+    logger.info("Incoming to get group func")
     repo = GroupRepository(session=db)
     get_group = await repo.get_one_or_none(Group.id == group_id)
     if not get_group:
+        logger.warning(f"Group with id '{group_id}' not found")
         raise HTTPException(
             status_code=404,
             detail=f"Group with id '{group_id}' not found"

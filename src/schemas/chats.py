@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 from pydantic import BaseModel, Field
 
@@ -23,4 +23,4 @@ class ChatResponse(BaseChat):
     name_chat: str
     type: ChatType = ChatType.PERSONAL
     creator_id: int
-    users: List[UserResponse] #[List[int]]
+    users: List[UserResponse]

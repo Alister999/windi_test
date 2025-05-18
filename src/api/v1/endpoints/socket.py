@@ -11,7 +11,7 @@ import logging
 from src.services.web_socket_service import get_group_user_ids, get_direct_chat_user_ids, group_connection, \
     chat_connection
 
-logger = logging.Logger(__name__)
+logger = logging.getLogger("SocketEndpoint")
 
 router = APIRouter()
 manager = ConnectionManager()
@@ -26,6 +26,7 @@ async def websocket_endpoint(
 ):
 
     logger.info(f"Connecting user (name: {current_user.name}, id: {current_user.id})")
+
     try:
         repo_group = GroupRepository(session=db)
         check_group = await repo_group.get_one_or_none(Group.id == group_id)
