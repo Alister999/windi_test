@@ -14,6 +14,7 @@ load_dotenv()
 
 
 database_url = f'postgresql+asyncpg://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:5432/{settings.DB_NAME}'
+sync_database_url = f'postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:5432/{settings.DB_NAME}'
 if not database_url:
     raise ValueError("DATABASE_URL is not set in .env file")
 

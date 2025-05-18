@@ -4,29 +4,40 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.database import MessageRepository, UserRepository, ChatRepository
+from src.core.database import MessageRepository, UserRepository, ChatRepository, GroupRepository
 from src.models.chats import Chat
+from src.models.group import Group
 from src.models.message import Message
 from src.models.user import User
-from src.schemas.messages import MessageCreate, MessageResponse, MessageHistory
+from src.schemas.messages import MessageCreate, MessageResponse, MessageHistory, MessageCreateGroup
 
 
-async def create_message_now(data: MessageCreate, db: AsyncSession) -> MessageResponse:
+async def create_message_now(data: MessageCreate | MessageCreateGroup, db: AsyncSession) -> MessageResponse:
     repo = MessageRepository(session=db)
     repo_users = UserRepository(session=db)
     repo_chat = ChatRepository(session=db)
+    repo_group = GroupRepository(session=db)
     check_user = await repo_users.get_one_or_none(User.id == data.sender_id)
     if not check_user:
         raise HTTPException(
             status_code=404,
             detail=f"User-sender with id '{data.sender_id}' not found"
         )
-    check_chat = await repo_chat.get_one_or_none(Chat.id == data.chat_id)
-    if not check_chat:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Chat with id '{data.chat_id}' not found"
-        )
+
+    if isinstance(data, MessageCreate):
+        check_chat = await repo_chat.get_one_or_none(Chat.id == data.chat_id)
+        if not check_chat:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Chat with id '{data.chat_id}' not found"
+            )
+    else:
+        check_group = await repo_group.get_one_or_none(Group.id == data.group_id)
+        if not check_group:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Group with id '{data.group_id}' not found"
+            )
 
     updated_data = data.dict(exclude_unset=True)
     new_message = Message()
