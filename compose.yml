@@ -14,10 +14,10 @@ services:
       db_host:
         condition: service_healthy
     volumes:
-      - .:/app
+      - .:/src
     networks:
       - internal_network
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
 
   db_host:
     image: postgres:13
