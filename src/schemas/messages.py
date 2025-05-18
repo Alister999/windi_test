@@ -17,13 +17,20 @@ class MessageCreate(MessageGroup):
     client_message_id: str
     sender_id: Optional[int]
 
+class MessageCreateGroup(MessageGroup):
+    group_id: int
+    text: str = Field(max_length=200)
+    client_message_id: str
+    sender_id: Optional[int]
+
 
 class MessageResponse(MessageGroup):
     id: int
-    chat_id: int
+    chat_id: Optional[int]
+    group_id: Optional[int]
     sender_id: int
     text: str
-    client_message_id: str #new
+    client_message_id: str
     is_read: ReadType = ReadType.UNREAD
     timestamp: datetime
 
