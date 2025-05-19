@@ -40,7 +40,7 @@ async def delete_user(user_id: int, db: SessionDep, current_user: AuthDep) -> di
 
 
 @router.get('/user', response_model=List[UserResponse])
-async def get_users(db: SessionDep, current_user: AuthDep) -> List[UserResponse]:
+async def get_users(db: SessionDep, current_user: AuthDep) -> List[UserResponse]: #, current_user: AuthDep
     logger.info("Calling get users endpoint")
     result = await get_users_all(db)
     return result

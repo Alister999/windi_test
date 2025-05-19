@@ -1,28 +1,51 @@
-# import pytest
-# from unittest.mock import MagicMock
-#
-# def pytest_configure(config):
-#     """
-#     Настраивает мок для Settings до импорта модулей.
-#     """
-#     from unittest.mock import patch
-#     # Патчим модуль, а не класс, чтобы избежать импорта Settings
-#     patcher = patch("src.core.config.settings", new=MagicMock())
-#     mock_settings = patcher.start()
-#     mock_settings.DB_USER = "test_user"
-#     mock_settings.DB_PASSWORD = "test_password"
-#     mock_settings.DB_HOST = "localhost"
-#     mock_settings.DB_NAME = "test_db"
-#     mock_settings.ALGORITHM = "HS256"
-#     mock_settings.ACCESS_TOKEN_EXPIRE_MINUTES = 30
-#     mock_settings.REFRESH_TOKEN_EXPIRE_DAYS = 7
-#     mock_settings.SECRET_KEY = "test_secret_key"
-#     config._settings_patch = patcher
-#     print("Mocked settings in pytest_configure")
-#
-# def pytest_unconfigure(config):
-#     """
-#     Очищает мок после тестов.
-#     """
-#     if hasattr(config, "_settings_patch"):
-#         config._settings_patch.stop()
+import os
+import pytest
+import pytest_asyncio
+from httpx import AsyncClient
+from httpx import ASGITransport
+from src.main import app
+from src.core.database import init_db
+from sqlalchemy.ext.asyncio import async_sessionmaker
+
+from src.models.general import Base
+
+
+@pytest.fixture(scope="session", autouse=True)
+def set_test_env():
+    os.environ["IS_TEST"] = "1"
+
+
+@pytest_asyncio.fixture(scope="session", autouse=True)
+async def setup_database():
+    await init_db()
+
+
+@pytest_asyncio.fixture
+async def client():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        yield ac
+
+
+
+
+from sqlalchemy import text
+
+import pytest_asyncio
+from sqlalchemy import text
+from src.core.database import get_db, Base
+
+@pytest_asyncio.fixture(autouse=True)
+async def clean_db():
+    yield
+
+    async for session in get_db():
+        result = await session.execute(text("SELECT current_database()"))
+        db_name = result.scalar()
+        if "test_db" not in db_name:
+            raise RuntimeError(f"❌ CLEAN_DB попытался очистить не тестовую базу: {db_name}")
+
+        for table in reversed(Base.metadata.sorted_tables):
+            await session.execute(table.delete())
+        await session.commit()
+        break
