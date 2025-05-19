@@ -1,7 +1,9 @@
 import pytest
 from httpx import AsyncClient
 
+
 pytestmark = pytest.mark.asyncio
+
 
 async def test_post_group(client: AsyncClient):
     data = {

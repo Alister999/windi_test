@@ -1,12 +1,10 @@
 import logging
 import uuid
 from typing import Set
-
 import sqlalchemy
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from starlette.websockets import WebSocket
-
 from src.core.ConnectionManager import ConnectionManager
 from src.models.chats import Chat
 from src.models.group import Group
@@ -14,6 +12,7 @@ from src.models.message import Message
 from src.models.user import User
 from src.schemas.messages import MessageCreateGroup, MessageCreate
 from src.services.message_service import create_message_now
+
 
 logger = logging.Logger(__name__)
 
@@ -25,7 +24,7 @@ async def get_group_user_ids(db: AsyncSession, group_id: int) -> Set[int]:
         if not group: #chat:
             logger.error(f"Group not found: id={group_id}")
             return set()
-        user_ids = {user.id for user in group.users} #chat.users}
+        user_ids = {user.id for user in group.users}
         logger.info(f"Group {group_id} users: {user_ids}")
         return user_ids
     except Exception as e:

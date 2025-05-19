@@ -1,6 +1,7 @@
 from sqlalchemy import Table, Column, Integer, ForeignKey
 from src.models.general import Base
 
+
 user_group_association = Table(
     "user_group_association",
     Base.metadata,

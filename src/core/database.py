@@ -1,11 +1,12 @@
 import logging
 import os
+from typing import Any, AsyncGenerator
+
 IS_TEST = os.getenv("IS_TEST") == "1"
 
 from advanced_alchemy.config import SQLAlchemyAsyncConfig
 from advanced_alchemy.repository import SQLAlchemyAsyncRepository
 from dotenv import load_dotenv
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.chats import Chat
 from src.models.general import Base
@@ -31,7 +32,7 @@ def get_config() -> SQLAlchemyAsyncConfig:
     return SQLAlchemyAsyncConfig(connection_string=url)
 
 
-async def get_db() -> AsyncSession:
+async def get_db() -> AsyncGenerator[Any, Any]:
     logger.info("Try to get DB")
     config = get_config()
     async with config.get_session() as session:

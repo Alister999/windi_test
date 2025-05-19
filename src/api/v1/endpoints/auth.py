@@ -32,7 +32,7 @@ async def refresh_token(data: RefreshToken, db: SessionDep) -> dict:
 
 
 @router.delete('/delete_user/{user_id}')
-async def delete_user(user_id: int, db: SessionDep, current_user: AuthDep) -> dict:
+async def delete_user(user_id: int, db: SessionDep, current_user: AuthDep) -> dict[str, str] | None:
     logger.info("Calling delete user endpoint")
     result = await delete_this_user(user_id, db)
     if result:

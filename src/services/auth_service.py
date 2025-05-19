@@ -1,17 +1,16 @@
 import logging
 import os
 from typing import List
-
 from fastapi import HTTPException
 from jose import jwt, JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.core.config import settings
 from src.core.database import get_db, UserRepository
 from src.core.utils import verify_password, hash_password
 from src.models.user import User
 from src.schemas.users import UserResponse, UserCreate, UserLogin, RefreshToken
 from src.services.auth_utils import create_access_token, create_refresh_token
+
 
 logger = logging.getLogger("AuthService")
 
@@ -168,7 +167,7 @@ async def change_this_user(data: UserCreate, user_id: int, db: AsyncSession) -> 
             detail=f"User with id '{user_id}' is absent"
         )
 
-    updated_data = data.dict(exclude_unset=True)
+    updated_data = data.model_dump(exclude_unset=True)
     if updated_data['name']:
         getting_name_user = await repo.get_one_or_none(User.name == updated_data['name'])
         if getting_name_user:

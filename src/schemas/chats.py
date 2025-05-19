@@ -1,7 +1,5 @@
 from typing import List
-
 from pydantic import BaseModel, Field
-
 from src.models.chats import ChatType
 from src.schemas.users import UserResponse
 

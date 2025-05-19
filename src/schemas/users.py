@@ -16,6 +16,7 @@ class UserLogin(BaseUser):
     name: str
     password: str
 
+
 class UserResponse(BaseUser):
     id: int
     name: str

@@ -1,15 +1,14 @@
 import logging
 from typing import List
-
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-
 from src.core.database import GroupRepository, UserRepository
 from src.models.group import Group
 from src.models.user import User
 from src.schemas.groups import GroupCreate, GroupResponse
 from src.schemas.users import UserResponse
+
 
 logger = logging.getLogger("GroupService")
 
@@ -173,6 +172,5 @@ async def get_group_now(group_id: int, db: AsyncSession) -> GroupResponse:
         creator_id=get_group.creator_id,
         user_ids=[UserResponse.model_validate(user) for user in get_group.users]
     )
-
 
     return re_formatted_group

@@ -3,10 +3,9 @@ import pytest
 import pytest_asyncio
 from httpx import AsyncClient
 from httpx import ASGITransport
+from sqlalchemy import text
 from src.main import app
-from src.core.database import init_db
-from sqlalchemy.ext.asyncio import async_sessionmaker
-
+from src.core.database import init_db, get_db
 from src.models.general import Base
 
 
@@ -26,14 +25,6 @@ async def client():
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
 
-
-
-
-from sqlalchemy import text
-
-import pytest_asyncio
-from sqlalchemy import text
-from src.core.database import get_db, Base
 
 @pytest_asyncio.fixture(autouse=True)
 async def clean_db():
