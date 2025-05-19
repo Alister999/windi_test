@@ -1,9 +1,12 @@
 import logging
+import os
+from typing import Any, AsyncGenerator
+
+IS_TEST = os.getenv("IS_TEST") == "1"
 
 from advanced_alchemy.config import SQLAlchemyAsyncConfig
 from advanced_alchemy.repository import SQLAlchemyAsyncRepository
 from dotenv import load_dotenv
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.chats import Chat
 from src.models.general import Base
@@ -15,25 +18,32 @@ from src.core.config import settings
 load_dotenv()
 logger = logging.getLogger("DB")
 
+db_config: SQLAlchemyAsyncConfig | None = None
 
-database_url = f'postgresql+asyncpg://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:5432/{settings.DB_NAME}'
-sync_database_url = f'postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:5432/{settings.DB_NAME}'
-if not database_url:
-    logger.critical("DATABASE_URL is not set in .env file")
-    raise ValueError("DATABASE_URL is not set in .env file")
 
-db_config = SQLAlchemyAsyncConfig(connection_string=database_url)
+def get_config() -> SQLAlchemyAsyncConfig:
+    is_test = os.getenv("IS_TEST") == "1"
+    logger.info(f"IS_TEST = {is_test}")
+    url = (
+        f"postgresql+asyncpg://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.TEST_DB_HOST}:5432/{settings.TEST_DB_NAME}"
+        if is_test
+        else f"postgresql+asyncpg://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:5432/{settings.DB_NAME}"
+    )
+    return SQLAlchemyAsyncConfig(connection_string=url)
 
-async def get_db() -> AsyncSession:
+
+async def get_db() -> AsyncGenerator[Any, Any]:
     logger.info("Try to get DB")
-    async with db_config.get_session() as session:
+    config = get_config()
+    async with config.get_session() as session:
         yield session
+
 
 async def init_db():
     logger.info("Try to init DB")
-    async with db_config.get_engine().begin() as conn:
+    config = get_config()
+    async with config.get_engine().begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-
 
 
 class UserRepository(SQLAlchemyAsyncRepository[User]):

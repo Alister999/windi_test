@@ -1,16 +1,15 @@
 import logging
 from typing import List
-
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.core.database import MessageRepository, UserRepository, ChatRepository, GroupRepository
 from src.models.chats import Chat
 from src.models.group import Group
 from src.models.message import Message
 from src.models.user import User
 from src.schemas.messages import MessageCreate, MessageResponse, MessageHistory, MessageCreateGroup
+
 
 logger = logging.getLogger("MessageService")
 
@@ -48,7 +47,7 @@ async def create_message_now(data: MessageCreate | MessageCreateGroup, db: Async
                 detail=f"Group with id '{data.group_id}' not found"
             )
 
-    updated_data = data.dict(exclude_unset=True)
+    updated_data = data.model_dump(exclude_unset=True)
     new_message = Message()
 
     for key, value in updated_data.items():
@@ -110,7 +109,7 @@ async def change_message_now(message_id: int, data: MessageCreate, db: AsyncSess
             detail=f"Message with id '{message_id}' is absent"
         )
 
-    updated_data = data.dict(exclude_unset=True)
+    updated_data = data.model_dump(exclude_unset=True)
 
     for key, value in updated_data.items():
         if key != "id":

@@ -1,11 +1,9 @@
 from typing import List
 from src.models.user_association_group import user_group_association
-from sqlalchemy import ForeignKey, Table, Column
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from src.models.general import Base
 from src.models.user import User
-
 
 
 class Group(Base):
@@ -21,8 +19,3 @@ class Group(Base):
         back_populates="groups",
         lazy="selectin"
     )
-
-
-
-
-

@@ -2,7 +2,6 @@ from typing import List
 from src.models.user_association_group import user_group_association
 from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.testing.schema import mapped_column
-
 from src.models.general import Base
 from src.models.user_assotiation_chat import user_chat_association
 

@@ -1,13 +1,12 @@
 import logging
 from typing import List
-
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.core.database import ChatRepository, UserRepository
 from src.models.chats import Chat
 from src.models.user import User
 from src.schemas.chats import ChatCreate, ChatResponse
+
 
 logger = logging.getLogger("ChatService")
 
@@ -103,7 +102,7 @@ async def change_chat_now(chat_id: int, data: ChatCreate, db: AsyncSession) -> C
             detail=f"User-creator with id '{data.creator_id}' not found"
         )
 
-    updated_data = data.dict(exclude_unset=True)
+    updated_data = data.model_dump(exclude_unset=True)
 
     for key, value in updated_data.items():
         if key != "id":

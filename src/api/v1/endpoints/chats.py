@@ -1,10 +1,7 @@
 import logging
 from typing import List
 
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.core.database import get_db
+from fastapi import APIRouter
 from src.core.dependencies import SessionDep, AuthDep
 from src.schemas.chats import ChatResponse, ChatCreate
 from src.services.chat_service import create_chat_now, delete_chat_now, change_chat_now, get_chats_now, get_chat_now

@@ -1,18 +1,14 @@
 import logging
 import os
-
-from advanced_alchemy.repository import SQLAlchemyAsyncRepository
 from dotenv import load_dotenv
-from fastapi import Depends, HTTPException, FastAPI, Query
+from fastapi import Depends, HTTPException, Query
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
-
 from src.core.config import settings
-from src.core.database import init_db, get_db, UserRepository  # , UserRepository
-# from src.core.dependencies import SessionDep
+from src.core.database import get_db, UserRepository
 from src.models.user import User
 
 load_dotenv()
@@ -20,6 +16,7 @@ logger = logging.getLogger("Utils")
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 def hash_password(password: str):
     logger.info("Hashing password")
@@ -32,6 +29,7 @@ def verify_password(plain_password: str, hashed_password: str):
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
 
 async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
     logger.info("Try get current user")
@@ -57,6 +55,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
         logger.error("User is absent")
         raise credentials_exception
     return user
+
 
 async def get_current_user_ws(token: str = Query(...), db: AsyncSession = Depends(get_db)) -> User:
     logger.info("Try get current user for WS")

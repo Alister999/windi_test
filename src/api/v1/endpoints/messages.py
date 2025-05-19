@@ -51,6 +51,7 @@ async def get_message(message_id: int, db: SessionDep, current_user: AuthDep) ->
 @router.get("/history/{chat_id}", response_model=List[MessageHistory])
 async def get_chat_history(
     db: SessionDep,
+    current_user: AuthDep,
     chat_id: int,
     limit: int = 50,
     offset: int = 0,

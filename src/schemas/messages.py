@@ -1,8 +1,6 @@
 from datetime import datetime
 from typing import Optional
-
 from pydantic import BaseModel, Field
-
 from src.models.message import ReadType
 
 
@@ -16,6 +14,7 @@ class MessageCreate(MessageGroup):
     text: str = Field(max_length=200)
     client_message_id: str
     sender_id: Optional[int]
+
 
 class MessageCreateGroup(MessageGroup):
     group_id: int
@@ -33,6 +32,7 @@ class MessageResponse(MessageGroup):
     client_message_id: str
     is_read: ReadType = ReadType.UNREAD
     timestamp: datetime
+
 
 class MessageHistory(MessageGroup):
     chat_id: int

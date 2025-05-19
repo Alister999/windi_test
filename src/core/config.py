@@ -5,11 +5,13 @@ class Settings(BaseSettings):
     DB_PASSWORD: str
     DB_HOST: str
     DB_NAME: str
-    # CORS_ORIGINS: List[str] = ["http://localhost:3000"]
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     REFRESH_TOKEN_EXPIRE_DAYS: int
     SECRET_KEY: str
+    IS_TEST: int
+    TEST_DB_NAME: str
+    TEST_DB_HOST: str
 
     class Config:
         env_file = ".env"
